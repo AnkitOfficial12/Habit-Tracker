@@ -1,0 +1,31 @@
+import mongoose from "mongoose";
+
+const habitLogSchema = new mongoose.Schema(
+    {
+        userId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User",
+            required: true,
+            index: true,
+        },
+        habitId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Habit",
+            required: true,
+            index: true,
+        },
+        completedDetails: {
+            type: String,
+            required: true,
+        },
+        note: {
+            type: String,
+            default: "",
+        },
+    },
+    { timestamps: true }
+);
+
+habitLogSchema.index({ userId: 1, habitId: 1, createdAt: 1 }, { unique: true });
+
+export default mongoose.model("HabitLog", habitLogSchema);
