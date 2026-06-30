@@ -1,5 +1,5 @@
 // Crating Healper Funtions
-import { format, subDays, startOfWeek, endOfWeek, eachDayOfInterval} from 'date-fns'
+import { format, subDays, startOfWeek, endOfWeek, eachDayOfInterval } from 'date-fns'
 
 export const toDateKey = (date) => format(date, "yyyy-MM-dd")
 
@@ -13,9 +13,9 @@ export const last90Days = () => {
 
 export const currentWeekKeys = () => {
     const now = new Date();
-    const start = startOfWeek(now, {weekStartsOn: 1});
-    const end = endOfWeek(now, {weekStartsOn: 1});
-    return eachDaysOfInterval( { start, end }).map(toDateKey);
+    const start = startOfWeek(now, { weekStartsOn: 1 });
+    const end = endOfWeek(now, { weekStartsOn: 1 });
+    return eachDaysOfInterval({ start, end }).map(toDateKey);
 };
 
 export const lastNDays = (n) => {
@@ -32,7 +32,7 @@ export const calcStreak = (sortedDateKeys) => {
 
     let current = 0;
     let cursor = new Date();
-    if(!set.has(today) && !set.has(yesterday)) {
+    if (!set.has(today) && !set.has(yesterday)) {
         current = 0;
     } else {
         if (!set.has(today)) cursor = subDays(cursor, 1);
@@ -47,10 +47,10 @@ export const calcStreak = (sortedDateKeys) => {
     let run = 0;
     let prev = null;
     for (const k of sortedAsc) {
-        if(prev) {
+        if (prev) {
             const d = new Date(k);
             const p = new Date(prev);
-            const diff = Math.round(( d - p ) / (1000 * 60 * 60 * 24 ));
+            const diff = Math.round((d - p) / (1000 * 60 * 60 * 24));
             if (diff === 1) run += 1;
             else run = 1;
         } else {

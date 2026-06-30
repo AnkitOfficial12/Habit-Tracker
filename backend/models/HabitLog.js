@@ -24,6 +24,7 @@ const habitLogSchema = new mongoose.Schema(
         },
     },
     { timestamps: true }
+    
 );
 
 habitLogSchema.index({ userId: 1, habitId: 1, createdAt: 1 }, { unique: true });

@@ -1,20 +1,24 @@
 import HabitLog from "../models/HabitLog.js";
 import Habit from "../models/Habit.js";
-import { toDateKey, last90Days, lastNDays, calcStreak, todayKey } from "../utils/dateHalpers.js";
+import { last90Days, lastNDays, calcStreak, todayKey } from "../utils/dateHalpers.js";
 
 export const markComplete = async (req, res) => {
     try {
         const { habitId, date } = req.body;
         const comoletedDate = date || todayKey();
+        // console.log('Finding habit with:', { habitId, userId });
         const habit = await Habit.findOne({
             _id: habitId,
             userId: req.user._id,
         });
+        // console.log('HabitID:', habitId);
+        // console.log('UserID:', req.user._id);
+
         if (!habit) return res.status(404).json({ message: "Habit not found " })
 
         const log = await HabitLog.findOneAndUpdate(
             { userId: req.user._id, habitId, completedDetails },
-            { $setOnInsert: { userId: req.user._id, habitId, completedDetails } },
+            { $setOnInsert: { userId: req.user._id, habitId, completedDate } },
             { upsert: true, new: true }
         );
         res.status(201).json(log);
@@ -26,7 +30,7 @@ export const markComplete = async (req, res) => {
 export const unmarkComplete = async (req, res) => {
     try {
         const { habitId, date } = req.body;
-        const comoletedDate = date || todayKey();
+        const completedDate = date || todayKey();
         await HabitLog.findOneAndDelete( {
             userId: req.user._id,
             habitId,
@@ -42,7 +46,7 @@ export const getToday = async (req, res) => {
     try{
         const logs = await HabitLog.find ({
             userId: req.user._id,
-            completedDetails: todayKey(),
+            completedDate: todayKey(),
         });
         res.json(logs);
     } catch (error) {
@@ -55,7 +59,7 @@ export const getRange = async (req, res) => {
         const { start, end } = req.query;
         const logs = await HabitLog.find({
             userId: req.user._id,
-            completedDetails: { $gte: start, $lte: end },
+            completedDate: { $gte: start, $lte: end },
         });
         res.json(logs);
     } catch (error) {
@@ -72,13 +76,13 @@ export const getHeatmap = async (req, res) => {
         });
         const counts = {};
         for (const d of days) counts[d] = 0;
-        for (const l of logs) counts[l.comoletedDate] = (consts[l.completedDate] || 0) + 1;
+        for (const l of logs) counts[l.completedDate] = (consts[l.completedDate] || 0) + 1;
         const data = days.map((d) => ({ date: d, count: counts[d] || 0 }));
         res.json(date);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
-};
+};  
 
 export const getHabitStats = async (req, res) => {
     try {
@@ -115,7 +119,7 @@ export const getHabitStats = async (req, res) => {
             currentStreak: current,
             longestStreak: longest,
             completionRate,
-            monthly
+            monthly,
         });
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -149,6 +153,7 @@ export const getAllStats = async (req, res) => {
                 longestStreak: longest,
             };
         });
+        
 
         res.json({ perHabit, days })
     } catch (error) {
